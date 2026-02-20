@@ -9,9 +9,9 @@ const server = http.createServer(app);
 server.listen(config.port, () => {
     logger.info(`
   ╔══════════════════════════════════════════════════╗
-  ║   CI/CD Auto-Healing Agent Backend              ║
-  ║   Running on port ${config.port}                         ║
-  ║   Environment: ${config.nodeEnv.padEnd(20)}          ║
+  ║   CI/CD Auto-Healing Agent Backend               ║
+  ║   Running on port ${config.port}                           ║
+  ║   Environment: ${config.nodeEnv.padEnd(20)}              ║
   ╚══════════════════════════════════════════════════╝
   `);
 });

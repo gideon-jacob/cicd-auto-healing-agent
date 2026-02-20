@@ -27,6 +27,8 @@ jobs:
           npm ci
 
       - name: Build project
+        env:
+          VITE_API_URL: ${{ secrets.VITE_API_URL }}
         run: |
           cd frontend
           npm run build

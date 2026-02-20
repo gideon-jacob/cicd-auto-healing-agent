@@ -7,7 +7,8 @@
         "dev": "nodemon --exec ts-node src/server.ts",
         "build": "npx tsc",
         "start": "node dist/server.js",
-        "lint": "eslint src/**/*.ts"
+        "lint": "eslint src/**/*.ts",
+        "test": "jest"
     },
     "dependencies": {
         "@google/generative-ai": "^0.21.0",
@@ -24,10 +25,15 @@
         "@types/compression": "^1.7.5",
         "@types/cors": "^2.8.17",
         "@types/express": "^5.0.0",
+        "@types/jest": "^30.0.0",
         "@types/morgan": "^1.9.9",
         "@types/node": "^22.12.0",
+        "@types/supertest": "^6.0.3",
         "@types/uuid": "^10.0.0",
+        "jest": "^30.2.0",
         "nodemon": "^3.1.9",
+        "supertest": "^7.2.2",
+        "ts-jest": "^29.4.6",
         "ts-node": "^10.9.2",
         "typescript": "^5.7.3"
     },
