@@ -9,8 +9,16 @@ import { Badge } from "@/components/ui/badge";
 import { GitBranch, Globe, Users } from "lucide-react";
 
 export function RunSummaryCard() {
-    const summary = useAgentStore((s) => s.runSummary);
+    const summary = useAgentStore((s) => s.summary);
+    const repoUrl = useAgentStore((s) => s.repoUrl);
+    const teamName = useAgentStore((s) => s.teamName);
+    const teamLeader = useAgentStore((s) => s.teamLeader);
+    const branchName = useAgentStore((s) => s.branchName);
+    const status = useAgentStore((s) => s.status);
+
     if (!summary) return null;
+
+    const cicdStatus = summary.finalCicdStatus ?? status ?? "RUNNING";
 
     return (
         <Card className="h-full border-border/50">
@@ -19,12 +27,14 @@ export function RunSummaryCard() {
                     <span className="text-base">Run Summary</span>
                     <Badge
                         className={
-                            summary.cicdStatus === "PASSED"
+                            cicdStatus === "PASSED"
                                 ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/20 hover:bg-emerald-500/20 shadow-emerald-500/10 shadow-sm"
-                                : "bg-red-500/15 text-red-400 border-red-500/20 hover:bg-red-500/20 shadow-red-500/10 shadow-sm"
+                                : cicdStatus === "FAILED" || cicdStatus === "ERROR"
+                                    ? "bg-red-500/15 text-red-400 border-red-500/20 hover:bg-red-500/20 shadow-red-500/10 shadow-sm"
+                                    : "bg-amber-500/15 text-amber-400 border-amber-500/20 hover:bg-amber-500/20 shadow-amber-500/10 shadow-sm"
                         }
                     >
-                        {summary.cicdStatus}
+                        {cicdStatus}
                     </Badge>
                 </CardTitle>
             </CardHeader>
@@ -36,7 +46,7 @@ export function RunSummaryCard() {
                         </div>
                         <div className="min-w-0">
                             <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium">Repository</p>
-                            <p className="font-medium text-sm break-all mt-0.5">{summary.repoUrl}</p>
+                            <p className="font-medium text-sm break-all mt-0.5">{repoUrl}</p>
                         </div>
                     </div>
 
@@ -46,8 +56,8 @@ export function RunSummaryCard() {
                         </div>
                         <div className="min-w-0">
                             <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium">Team</p>
-                            <p className="font-medium text-sm mt-0.5">{summary.teamName}</p>
-                            <p className="text-xs text-muted-foreground">Leader: {summary.teamLeader}</p>
+                            <p className="font-medium text-sm mt-0.5">{teamName}</p>
+                            <p className="text-xs text-muted-foreground">Leader: {teamLeader}</p>
                         </div>
                     </div>
 
@@ -58,7 +68,7 @@ export function RunSummaryCard() {
                         <div className="min-w-0">
                             <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium">Branch Created</p>
                             <code className="text-xs font-mono bg-muted/50 px-2 py-1 rounded mt-1 inline-block break-all">
-                                {summary.branchName}
+                                {branchName}
                             </code>
                         </div>
                     </div>

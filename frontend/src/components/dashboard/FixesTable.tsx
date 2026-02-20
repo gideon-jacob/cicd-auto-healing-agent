@@ -29,7 +29,7 @@ export function FixesTable() {
     const fixes = useAgentStore((s) => s.fixes);
     if (fixes.length === 0) return null;
 
-    const fixedCount = fixes.filter((f) => f.status === "fixed").length;
+    const fixedCount = fixes.filter((f) => f.status === "FIXED").length;
 
     return (
         <Card className="border-border/50">
@@ -73,7 +73,7 @@ export function FixesTable() {
                                     {fix.commitMessage}
                                 </TableCell>
                                 <TableCell className="text-center pr-6">
-                                    {fix.status === "fixed" ? (
+                                    {fix.status === "FIXED" ? (
                                         <span className="inline-flex items-center gap-1 text-emerald-400 text-xs font-medium">
                                             <CheckCircle2 className="h-3.5 w-3.5" />
                                             Fixed

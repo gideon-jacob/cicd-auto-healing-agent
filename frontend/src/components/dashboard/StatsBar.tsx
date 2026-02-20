@@ -1,22 +1,28 @@
 import { useAgentStore } from "@/store/agentStore";
 import { Bug, CheckCircle2, GitCommitHorizontal, Clock } from "lucide-react";
 
+function formatTime(seconds: number): string {
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return m > 0 ? `${m}m ${s}s` : `${s}s`;
+}
+
 export function StatsBar() {
-    const summary = useAgentStore((s) => s.runSummary);
+    const summary = useAgentStore((s) => s.summary);
     const score = useAgentStore((s) => s.score);
     if (!summary) return null;
 
     const stats = [
         {
             label: "Failures Detected",
-            value: summary.totalFailures,
+            value: summary.totalFailuresDetected,
             icon: Bug,
             color: "text-red-400",
             bg: "bg-red-500/10",
         },
         {
             label: "Fixes Applied",
-            value: summary.totalFixes,
+            value: summary.totalFixesApplied,
             icon: CheckCircle2,
             color: "text-emerald-400",
             bg: "bg-emerald-500/10",
@@ -30,7 +36,7 @@ export function StatsBar() {
         },
         {
             label: "Time Taken",
-            value: summary.timeTaken,
+            value: formatTime(summary.totalTimeSeconds),
             icon: Clock,
             color: "text-amber-400",
             bg: "bg-amber-500/10",

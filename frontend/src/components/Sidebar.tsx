@@ -1,22 +1,39 @@
-import { Search, FolderGit2, Cpu } from "lucide-react";
+import { useEffect } from "react";
+import { Search, FolderGit2, Cpu, Users } from "lucide-react";
 import { NavItem } from "./NavItem";
 import { UserProfile } from "./UserProfile";
 import { ModeToggle } from "./mode-toggle";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAgentStore } from "@/store/agentStore";
 
-const REPOS = [
-    { name: "cicd-auto-healing-agent", active: false },
-    { name: "personal-website", active: false },
-    { name: "ecommerce-platform", active: false },
-    { name: "notes-app", active: false },
+const TEAM_NAME = "Stack Over Lords";
+const TEAM_LEADER = "Prasannaa";
+
+const FALLBACK_REPOS = [
+    { name: "cicd-auto-healing-agent", url: "https://github.com/gideon-jacob/cicd-auto-healing-agent" },
+    { name: "pec-tracking-online-portal", url: "https://github.com/pec-developers/pec-tracking-online-portal" },
+    { name: "pec-events-app", url: "https://github.com/pec-developers/pec-events-app" },
+    { name: "online-shop-microservices", url: "https://github.com/gideon-jacob/online-shop-microservices" },
 ];
 
 export function Sidebar() {
     const [searchQuery, setSearchQuery] = useState("");
     const navigate = useNavigate();
+    const repos = useAgentStore((s) => s.repos);
+    const loadRepos = useAgentStore((s) => s.loadRepos);
+    const selectRepo = useAgentStore((s) => s.selectRepo);
 
-    const filteredRepos = REPOS.filter((repo) =>
+    useEffect(() => {
+        loadRepos();
+    }, [loadRepos]);
+
+    // Use API repos if available, otherwise fallback
+    const repoList = repos.length > 0
+        ? repos.map((r) => ({ name: r.name, url: r.repoUrl }))
+        : FALLBACK_REPOS;
+
+    const filteredRepos = repoList.filter((repo) =>
         repo.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
@@ -44,6 +61,16 @@ export function Sidebar() {
                 </div>
             </div>
 
+            {/* Team Info */}
+            <div className="px-4 py-3 border-b border-border/50">
+                <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1">
+                    <Users className="h-3 w-3" />
+                    <span className="uppercase tracking-wider font-semibold text-[10px]">Team</span>
+                </div>
+                <p className="text-sm font-medium">{TEAM_NAME}</p>
+                <p className="text-xs text-muted-foreground">Leader: {TEAM_LEADER}</p>
+            </div>
+
             {/* Navigation Items (Repos) */}
             <div className="flex-1 overflow-y-auto p-2 space-y-1">
                 <div className="px-2 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
@@ -54,8 +81,10 @@ export function Sidebar() {
                         key={repo.name}
                         name={repo.name}
                         icon={FolderGit2}
-                        active={repo.active}
-                        onClick={() => navigate(`/repo/${repo.name}`)}
+                        onClick={() => {
+                            selectRepo(repo.name, repo.url, TEAM_NAME, TEAM_LEADER);
+                            navigate(`/repo/${repo.name}`);
+                        }}
                     />
                 ))}
                 {filteredRepos.length === 0 && (
@@ -75,3 +104,4 @@ export function Sidebar() {
         </div>
     );
 }
+

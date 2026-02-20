@@ -25,7 +25,7 @@ function App() {
             element={
               <>
                 <Sidebar />
-                <main className="flex-1 overflow-hidden bg-background">
+                <main className="flex-1 overflow-auto bg-background">
                   <RepoPage />
                 </main>
               </>

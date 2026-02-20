@@ -86,11 +86,11 @@ jobs:
 
             # Pull latest code
             git fetch origin main
-            git reset --hard origin/main
+            git pull origin main --rebase
 
             # Install production dependencies
             cd backend
-            npm ci --omit=dev
+            npm ci
 
             # Build TypeScript
             npm run build

@@ -10,27 +10,29 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Loader2, Sparkles, GitBranch, Shield } from "lucide-react";
+import { Loader2, Sparkles, GitBranch, Shield, AlertCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAgentStore } from "@/store/agentStore";
 
 export default function Home() {
-    const [isLoading, setIsLoading] = useState(false);
     const [repoUrl, setRepoUrl] = useState("");
     const [teamName, setTeamName] = useState("");
     const [teamLeader, setTeamLeader] = useState("");
+    const [errorMsg, setErrorMsg] = useState("");
     const navigate = useNavigate();
     const startRun = useAgentStore((s) => s.startRun);
+    const isRunning = useAgentStore((s) => s.isRunning);
 
-    const handleRunAgent = () => {
+    const handleRunAgent = async () => {
         if (!repoUrl.trim() || !teamName.trim() || !teamLeader.trim()) return;
-        setIsLoading(true);
-        setTimeout(() => {
-            startRun({ repoUrl, teamName, teamLeader });
-            setIsLoading(false);
+        setErrorMsg("");
+        try {
+            await startRun({ repoUrl, teamName, teamLeader });
             const repoName = repoUrl.split("/").pop() || "new-repo";
             navigate(`/repo/${repoName}`);
-        }, 3000);
+        } catch (err) {
+            setErrorMsg(err instanceof Error ? err.message : "Failed to start agent run");
+        }
     };
 
     const isFormValid = repoUrl.trim() && teamName.trim() && teamLeader.trim();
@@ -109,22 +111,28 @@ export default function Home() {
                                 </code>
                             </div>
                         )}
+                        {errorMsg && (
+                            <div className="flex items-center gap-2 px-3 py-2 rounded-md bg-destructive/10 text-destructive text-xs animate-fade-in-up">
+                                <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+                                {errorMsg}
+                            </div>
+                        )}
                     </div>
                 </CardContent>
                 <CardFooter className="flex justify-end gap-3 pt-2">
                     <Button
                         variant="outline"
-                        onClick={() => { setRepoUrl(""); setTeamName(""); setTeamLeader(""); }}
-                        disabled={isLoading}
+                        onClick={() => { setRepoUrl(""); setTeamName(""); setTeamLeader(""); setErrorMsg(""); }}
+                        disabled={isRunning}
                     >
                         Clear
                     </Button>
                     <Button
                         onClick={handleRunAgent}
-                        disabled={isLoading || !isFormValid}
+                        disabled={isRunning || !isFormValid}
                         className="min-w-[140px]"
                     >
-                        {isLoading ? (
+                        {isRunning ? (
                             <>
                                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                                 Analyzing...

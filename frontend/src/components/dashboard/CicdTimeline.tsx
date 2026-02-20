@@ -8,10 +8,11 @@ import {
 import { CheckCircle2, XCircle, Timer } from "lucide-react";
 
 export function CicdTimeline() {
-    const cicdRuns = useAgentStore((s) => s.cicdRuns);
-    if (cicdRuns.length === 0) return null;
+    const timeline = useAgentStore((s) => s.timeline);
+    const currentIteration = useAgentStore((s) => s.currentIteration);
+    const maxIterations = useAgentStore((s) => s.maxIterations);
 
-    const retryLimit = 5;
+    if (timeline.length === 0) return null;
 
     return (
         <Card className="border-border/50 h-full">
@@ -20,23 +21,23 @@ export function CicdTimeline() {
                     <span className="text-base">CI/CD Timeline</span>
                     <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                         <Timer className="h-3.5 w-3.5" />
-                        {cicdRuns.length}/{retryLimit}
+                        {currentIteration}/{maxIterations}
                     </div>
                 </CardTitle>
             </CardHeader>
             <CardContent>
                 <div className="relative">
-                    {cicdRuns.map((run, i) => {
-                        const isPassed = run.status === "passed";
-                        const isLast = i === cicdRuns.length - 1;
-                        const time = new Date(run.timestamp).toLocaleTimeString([], {
+                    {timeline.map((iter, i) => {
+                        const isPassed = iter.status === "PASSED";
+                        const isLast = i === timeline.length - 1;
+                        const time = new Date(iter.startedAt).toLocaleTimeString([], {
                             hour: "2-digit",
                             minute: "2-digit",
                             second: "2-digit",
                         });
 
                         return (
-                            <div key={run.iteration} className="flex gap-4 pb-6 last:pb-0">
+                            <div key={iter.iteration} className="flex gap-4 pb-6 last:pb-0">
                                 {/* Timeline connector */}
                                 <div className="flex flex-col items-center">
                                     <div
@@ -57,12 +58,17 @@ export function CicdTimeline() {
                                 </div>
 
                                 {/* Content */}
-                                <div className="flex-1 flex items-center justify-between pt-1">
+                                <div className="flex-1 flex items-start justify-between pt-1">
                                     <div>
                                         <p className="text-sm font-medium">
-                                            Iteration #{run.iteration}
+                                            Iteration #{iter.iteration}
                                         </p>
                                         <p className="text-xs text-muted-foreground mt-0.5">{time}</p>
+                                        {(iter.failuresFound > 0 || iter.fixesApplied > 0) && (
+                                            <p className="text-[10px] text-muted-foreground mt-1">
+                                                {iter.failuresFound} found · {iter.fixesApplied} fixed
+                                            </p>
+                                        )}
                                     </div>
                                     <div
                                         className={`px-2.5 py-0.5 rounded-full text-[10px] font-semibold ${isPassed
