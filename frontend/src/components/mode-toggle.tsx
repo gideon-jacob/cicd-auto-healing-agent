@@ -1,37 +1,59 @@
-import { Moon, Sun } from "lucide-react"
-
-import { Button } from "@/components/ui/button"
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+import { Moon, Sun, Monitor } from "lucide-react"
 import { useTheme } from "@/components/theme-provider"
 
 export function ModeToggle() {
-    const { setTheme } = useTheme()
+    const { theme, setTheme } = useTheme()
+
+    const isDark = theme === "dark"
 
     return (
-        <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="icon">
-                    <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-                    <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-                    <span className="sr-only">Toggle theme</span>
-                </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => setTheme("light")}>
+        <div className="flex flex-col gap-2">
+            <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                    <Monitor className="h-3.5 w-3.5 text-muted-foreground" />
+                    <span className="text-xs font-medium text-muted-foreground">
+                        Appearance
+                    </span>
+                </div>
+                <span className="text-[10px] font-medium text-muted-foreground/70 uppercase tracking-wider">
+                    {isDark ? "Dark" : "Light"}
+                </span>
+            </div>
+
+            {/* Pill toggle */}
+            <button
+                onClick={() => setTheme(isDark ? "light" : "dark")}
+                className="group relative flex items-center w-full h-9 rounded-lg bg-muted/60 p-1 transition-colors hover:bg-muted"
+                aria-label="Toggle theme"
+            >
+                {/* Sliding highlight */}
+                <span
+                    className={`absolute h-7 w-[calc(50%-4px)] rounded-md bg-background shadow-sm border border-border/50 transition-all duration-300 ease-in-out ${isDark ? "left-[calc(50%+2px)]" : "left-1"
+                        }`}
+                />
+
+                {/* Light option */}
+                <span
+                    className={`relative z-10 flex items-center justify-center gap-1.5 flex-1 h-7 text-xs font-medium transition-colors duration-200 ${!isDark
+                            ? "text-foreground"
+                            : "text-muted-foreground group-hover:text-muted-foreground/80"
+                        }`}
+                >
+                    <Sun className="h-3.5 w-3.5" />
                     Light
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setTheme("dark")}>
+                </span>
+
+                {/* Dark option */}
+                <span
+                    className={`relative z-10 flex items-center justify-center gap-1.5 flex-1 h-7 text-xs font-medium transition-colors duration-200 ${isDark
+                            ? "text-foreground"
+                            : "text-muted-foreground group-hover:text-muted-foreground/80"
+                        }`}
+                >
+                    <Moon className="h-3.5 w-3.5" />
                     Dark
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setTheme("system")}>
-                    System
-                </DropdownMenuItem>
-            </DropdownMenuContent>
-        </DropdownMenu>
+                </span>
+            </button>
+        </div>
     )
 }

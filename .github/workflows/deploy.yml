@@ -9,10 +9,7 @@ jobs:
   # ─── Frontend: S3 + CloudFront ──────────────────────────────────────────────
   deploy-frontend:
     runs-on: ubuntu-latest
-    if: |
-      contains(toJSON(github.event.commits.*.modified), 'frontend/') ||
-      contains(toJSON(github.event.commits.*.added), 'frontend/')
-
+    
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
