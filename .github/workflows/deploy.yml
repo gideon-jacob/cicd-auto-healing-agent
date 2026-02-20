@@ -1,4 +1,4 @@
-name: Deploy to S3 and Invalidate CloudFront
+name: Deploy Frontend & Backend
 
 on:
   push:
@@ -6,8 +6,12 @@ on:
       - main
 
 jobs:
-  deploy:
+  # ─── Frontend: S3 + CloudFront ──────────────────────────────────────────────
+  deploy-frontend:
     runs-on: ubuntu-latest
+    if: |
+      contains(toJSON(github.event.commits.*.modified), 'frontend/') ||
+      contains(toJSON(github.event.commits.*.added), 'frontend/')
 
     steps:
       - name: Checkout code
@@ -44,3 +48,67 @@ jobs:
       - name: Invalidate CloudFront
         run: |
           aws cloudfront create-invalidation --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} --paths "/*"
+
+  # ─── Backend: EC2 via SSH ───────────────────────────────────────────────────
+  deploy-backend:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install dependencies
+        run: |
+          cd backend
+          npm ci
+
+      - name: Build TypeScript
+        run: |
+          cd backend
+          npm run build
+
+      - name: Deploy to EC2 via SSH
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          port: 22
+          script: |
+            set -e
+
+            # Navigate to deploy directory
+            cd ${{ secrets.EC2_DEPLOY_PATH }}
+
+            # Pull latest code
+            git fetch origin main
+            git reset --hard origin/main
+
+            # Install production dependencies
+            cd backend
+            npm ci --omit=dev
+
+            # Build TypeScript
+            npm run build
+
+            # Create logs directory
+            mkdir -p logs
+
+            # Restart with PM2
+            if pm2 list | grep -q "cicd-agent-backend"; then
+              pm2 restart cicd-agent-backend
+            else
+              pm2 start ecosystem.config.js
+            fi
+
+            # Save PM2 process list
+            pm2 save
+
+            echo "✅ Backend deployed successfully"
